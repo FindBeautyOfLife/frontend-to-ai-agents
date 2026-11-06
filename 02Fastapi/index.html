@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>任务管理系统</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #e4ecf7);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 20px;
+            color: #333;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 760px;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 32px;
+            color: #1f2937;
+            text-align: center;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 14px 16px;
+            font-size: 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .input-area input:focus {
+            border-color: #4f8cff;
+            box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.15);
+        }
+
+        .input-area button {
+            padding: 0 22px;
+            border: none;
+            border-radius: 12px;
+            background: #4f8cff;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .input-area button:hover {
+            background: #3b78e7;
+            transform: translateY(-1px);
+        }
+
+        .input-area button:disabled {
+            background: #9dbcf3;
+            cursor: not-allowed;
+        }
+
+        #message {
+            min-height: 24px;
+            margin: 0 0 15px 0;
+            color: #e11d48;
+            font-size: 14px;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .task-header h3 {
+            margin: 0;
+            font-size: 20px;
+            color: #374151;
+        }
+
+        .task-count {
+            font-size: 14px;
+            color: #6b7280;
+            background: #f3f4f6;
+            padding: 6px 12px;
+            border-radius: 999px;
+        }
+
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        li {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: #f9fafb;
+            border: 1px solid #eef2f7;
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 14px;
+            transition: 0.2s;
+        }
+
+        li:hover {
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+            transform: translateY(-1px);
+        }
+
+        li input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .task-text {
+            flex: 1;
+            font-size: 17px;
+            color: #1f2937;
+            word-break: break-word;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: #9ca3af;
+        }
+
+        .delete-btn {
+            border: none;
+            background: #ef4444;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+
+        .empty {
+            text-align: center;
+            color: #9ca3af;
+            padding: 30px 0 10px;
+            font-size: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h2 {
+                font-size: 26px;
+            }
+
+            .input-area {
+                flex-direction: column;
+            }
+
+            .input-area button {
+                height: 48px;
+            }
+
+            li {
+                align-items: flex-start;
+            }
+
+            .delete-btn {
+                padding: 8px 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>任务管理系统</h2>
+
+        <div class="input-area">
+            <input id="taskInput" placeholder="请输入任务内容">
+            <button id="addTask">添加任务</button>
+        </div>
+
+        <p id="message"></p>
+
+        <div class="task-header">
+            <h3>任务列表</h3>
+            <span class="task-count" id="taskCount">0 个任务</span>
+        </div>
+
+        <ul id="taskList"></ul>
+    </div>
+
+    <script>
+        const taskInput = document.getElementById("taskInput");
+        const addTaskBtn = document.getElementById("addTask");
+        const taskList = document.getElementById("taskList");
+        const message = document.getElementById("message");
+        const taskCount = document.getElementById("taskCount");
+
+        // fetch 遇到 HTTP 4xx/5xx 不会自动抛错，需要主动检查状态。
+        function checkResponse(response) {
+            if (!response.ok) {
+                throw new Error(`请求失败：HTTP ${response.status}`);
+            }
+            return response;
+        }
+
+        function updateTaskCount(tasks) {
+            const completedCount = tasks.filter(task => task.completed).length;
+            taskCount.textContent = `共 ${tasks.length} 个任务，已完成 ${completedCount} 个`;
+        }
+
+        // 列表以服务端返回的数据为准；每次修改成功后重新读取并渲染。
+        async function loadTasks() {
+            try {
+                const response = await fetch("/tasks");
+                checkResponse(response);
+                const tasks = await response.json();
+
+                taskList.innerHTML = "";
+
+                if (tasks.length === 0) {
+                    taskList.innerHTML = '<div class="empty">暂无任务，快去添加一个吧～</div>';
+                    updateTaskCount(tasks);
+                    return;
+                }
+
+                tasks.forEach(task => {
+                    const li = document.createElement("li");
+                    li.dataset.id = task.id;
+
+                    const checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.checked = task.completed;
+
+                    const span = document.createElement("span");
+                    // 将任务名称作为文本显示，避免把输入解释为 HTML。
+                    span.textContent = task.name;
+                    span.className = "task-text";
+
+                    if (task.completed) {
+                        span.classList.add("completed");
+                    }
+
+                    const deleteBtn = document.createElement("button");
+                    deleteBtn.textContent = "删除";
+                    deleteBtn.className = "delete-btn";
+
+                    li.appendChild(checkbox);
+                    li.appendChild(span);
+                    li.appendChild(deleteBtn);
+
+                    taskList.appendChild(li);
+                });
+
+                updateTaskCount(tasks);
+                message.textContent = "";
+            } catch (error) {
+                message.textContent = error.message;
+            }
+        }
+
+        async function addTask() {
+            const name = taskInput.value.trim();
+
+            if (!name) {
+                message.textContent = "任务不能为空";
+                return;
+            }
+
+            addTaskBtn.disabled = true;
+
+            try {
+                const response = await fetch("/tasks", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ name })
+                });
+
+                checkResponse(response);
+
+                taskInput.value = "";
+                message.textContent = "";
+                await loadTasks();
+            } catch (error) {
+                message.textContent = error.message;
+            } finally {
+                addTaskBtn.disabled = false;
+            }
+        }
+
+        async function deleteTask(taskId) {
+            const response = await fetch(`/tasks/${taskId}`, {
+                method: "DELETE"
+            });
+
+            checkResponse(response);
+            await loadTasks();
+        }
+
+        async function updateTask(taskId, completed) {
+            const response = await fetch(`/tasks/${taskId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ completed })
+            });
+
+            checkResponse(response);
+            await loadTasks();
+        }
+
+        addTaskBtn.addEventListener("click", addTask);
+
+        taskInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                addTask();
+            }
+        });
+
+        taskList.addEventListener("click", async (event) => {
+            const btn = event.target.closest(".delete-btn");
+
+            if (!btn) return;
+
+            const li = btn.closest("li");
+            const taskId = Number(li.dataset.id);
+
+            btn.disabled = true;
+
+            try {
+                await deleteTask(taskId);
+            } catch (error) {
+                message.textContent = error.message;
+                btn.disabled = false;
+            }
+        });
+
+        taskList.addEventListener("change", async (event) => {
+            if (!event.target.matches('input[type="checkbox"]')) {
+                return;
+            }
+
+            const checkbox = event.target;
+            const li = checkbox.closest("li");
+            const taskId = Number(li.dataset.id);
+            const completed = checkbox.checked;
+
+            checkbox.disabled = true;
+
+            try {
+                await updateTask(taskId, completed);
+            } catch (error) {
+                message.textContent = error.message;
+                checkbox.checked = !completed;
+                checkbox.disabled = false;
+            }
+        });
+
+        loadTasks();
+    </script>
+</body>
+
+</html>

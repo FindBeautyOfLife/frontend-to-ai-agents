@@ -1,0 +1,23 @@
+{
+  "A1001": {
+    "product_id": "P1001",
+    "product": "机械键盘",
+    "quantity": 1,
+    "status": "已发货",
+    "shipping": "演示物流：包裹已到达上海分拨中心，等待派送。"
+  },
+  "A1002": {
+    "product_id": "P1002",
+    "product": "无线鼠标",
+    "quantity": 2,
+    "status": "待发货",
+    "shipping": "仓库正在打包，暂未生成物流信息。"
+  },
+  "A1003": {
+    "product_id": "P1003",
+    "product": "显示器支架",
+    "quantity": 1,
+    "status": "已签收",
+    "shipping": "演示物流：收件人已签收。"
+  }
+}

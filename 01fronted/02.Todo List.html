@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Todo List</title>
+</head>
+
+<body>
+
+    <h2>任务列表</h2>
+
+    <input id="taskInput" placeholder="输入任务">
+    <button id="addTask">添加</button>
+
+    <ul id="taskList"></ul>
+
+    <script>
+        // 缓存输入框、按钮和列表，供事件处理函数使用。
+        const taskInput = document.getElementById('taskInput');
+        const addTaskBtn = document.getElementById('addTask');
+        const taskList = document.getElementById('taskList');
+        // 忽略空白输入，使用 textContent 将任务内容作为纯文本显示。
+        addTaskBtn.addEventListener('click', () => {
+            const taskText = taskInput.value.trim();
+            if (taskText) {
+                const li = document.createElement('li');
+                li.textContent = taskText;
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '删除';
+                li.appendChild(deleteBtn);
+                taskList.appendChild(li);
+                taskInput.value = '';
+            }
+        });
+        // 在列表上统一监听删除事件，新添加的按钮也能响应（事件委托）。
+        taskList.addEventListener('click', (event) => {
+            if (event.target.tagName === 'BUTTON') {
+                const li = event.target.parentElement;
+                li.remove();
+            }
+        });
+    </script>
+
+</body>
+
+</html>

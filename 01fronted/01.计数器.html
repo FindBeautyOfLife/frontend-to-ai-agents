@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>计数器练习</title>
+</head>
+
+<body>
+
+    <h2>简易计数器</h2>
+
+    <h1 id="count">0</h1>
+
+    <button id="add">加 1</button>
+    <button id="minus">减 1</button>
+    <button id="reset">重置</button>
+
+    <script>
+        // 用变量保存计数状态；刷新页面后恢复初始值。
+        let count = 0;
+        // 缓存显示元素，事件触发时通过 textContent 更新数字。
+        const countElement = document.getElementById('count');
+
+        // 获取按钮引用，分别注册点击事件。
+        const addBtn = document.getElementById('add');
+        const minusBtn = document.getElementById('minus');
+        const resetBtn = document.getElementById('reset');
+
+        // 先更新状态，再同步页面显示。
+        addBtn.addEventListener('click', () => {
+            count++;
+            countElement.textContent = count;
+        });
+
+        // 此示例允许计数值减为负数。
+        minusBtn.addEventListener('click', () => {
+            count--;
+            countElement.textContent = count;
+        });
+
+        // 将状态与页面显示一起重置为零。
+        resetBtn.addEventListener('click', () => {
+            count = 0;
+            countElement.textContent = count;
+        });
+
+    </script>
+
+</body>
+
+</html>

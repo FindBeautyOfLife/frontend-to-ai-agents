@@ -1,0 +1,52 @@
+# Local credentials: publish only the empty configuration templates.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+.aws/
+.ssh/
+.netrc
+.npmrc
+.pypirc
+credentials.json
+token.json
+
+# Python environments and generated files.
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local editor settings and operating system files.
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Runtime data may contain private documents or model output.
+.cache/
+outputs/
+*.log
+
+# Editor history, backup copies and archives can retain old private content.
+.history/
+*.bak
+*.old
+*.orig
+*.tmp
+*~
+*.zip
+*.7z
+*.rar
+*.tar
+*.gz
